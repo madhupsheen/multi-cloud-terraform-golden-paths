@@ -1,14 +1,16 @@
-variable "location" {
-  description = "Azure location for resources"
-  default     = "Australia East"
+terraform {
+
+  required_version = ">= 1.5.0"
+
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~>3.0"
+    }
+  }
+
 }
 
-variable "hub_rg_name" {
-  description = "Resource Group name for the hub"
-  default     = "rg-hub"
-}
-
-variable "hub_vnet_name" {
-  description = "Hub Virtual Network name"
-  default     = "vnet-hub"
+provider "azurerm" {
+  features {}
 }

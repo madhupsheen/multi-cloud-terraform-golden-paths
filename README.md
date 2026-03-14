@@ -1,25 +1,17 @@
-# Azure Landing Zones – Hub and Spoke Architecture (Terraform)
+# Azure Landing Zone – Hub and Spoke Architecture (Terraform)
 
-This repository demonstrates a simplified **Azure Landing Zone network architecture** built using **Terraform Infrastructure as Code**.
+This repository demonstrates a simplified **Azure Landing Zone hub-and-spoke network architecture** built using **Terraform Infrastructure as Code (IaC)**.
 
-The goal of this project is to provide a reusable foundation for deploying Azure environments that follow **enterprise networking best practices**, including hub-and-spoke design, environment isolation, and centralized security.
+The goal of this project is to show how Azure environments can be structured using **enterprise networking patterns**, including centralized security, isolated workloads, and scalable cloud architecture.
 
-This project is intended as a **learning and demonstration implementation** of Azure platform engineering concepts such as infrastructure automation, network segmentation, and cloud governance.
+This project focuses on:
 
----
+• Hub and Spoke network design
+• Infrastructure automation using Terraform
+• Network segmentation for Dev and Production environments
+• Reusable Azure infrastructure patterns
 
-# Architecture Overview
-
-The deployment follows a **hub-and-spoke network topology**.
-
-The **Hub Virtual Network** hosts shared services and central security components, while **Spoke Virtual Networks** host application workloads for different environments.
-
-Key design principles:
-
-• Centralized security and management
-• Environment isolation for workloads
-• Scalable network structure
-• Infrastructure deployed using Terraform
+The architecture reflects common practices used in enterprise cloud environments.
 
 ---
 
@@ -30,112 +22,127 @@ graph TD
 
     Internet((Internet))
 
-    subgraph Hub_VNet [Hub VNet 10.0.0.0/16]
+    subgraph Hub_VNet
         Firewall[Azure Firewall Subnet]
         Mgmt[Management Subnet]
         Shared[Shared Services Subnet]
     end
 
-    subgraph Dev_Spoke [Dev Spoke VNet 10.1.0.0/16]
-        DevApp[Application Subnet]
+    subgraph Dev_Spoke
+        DevApp[Dev Application Subnet]
     end
 
-    subgraph Prod_Spoke [Prod Spoke VNet 10.2.0.0/16]
-        ProdApp[Application Subnet]
+    subgraph Prod_Spoke
+        ProdApp[Prod Application Subnet]
     end
 
-    DevApp --> Firewall
-    ProdApp --> Firewall
+    Internet --> Firewall
+    Firewall --> Mgmt
+    Firewall --> Shared
 
-    Firewall --> Internet
+    Hub_VNet --> DevApp
+    Hub_VNet --> ProdApp
 ```
 
 ---
 
-# Network Design
+# Architecture Overview
 
-The project uses private IP address ranges defined by RFC1918.
+This architecture follows a **hub-and-spoke model**.
 
-Hub network:
+## Hub Virtual Network
 
-Hub VNet
+The hub network contains shared infrastructure and central security services.
+
+Hub VNet CIDR
+
 10.0.0.0/16
 
 Subnets
 
-AzureFirewallSubnet
-10.0.0.0/24
+AzureFirewallSubnet – 10.0.0.0/24
+ManagementSubnet – 10.0.1.0/24
+SharedServicesSubnet – 10.0.2.0/24
 
-ManagementSubnet
-10.0.1.0/24
+The hub is designed to host:
 
-SharedServicesSubnet
-10.0.2.0/24
-
-Spoke networks
-
-Dev Spoke VNet
-10.1.0.0/16
-
-ApplicationSubnet
-10.1.1.0/24
-
-Prod Spoke VNet
-10.2.0.0/16
-
-ApplicationSubnet
-10.2.1.0/24
+• Centralized firewall and security inspection
+• Shared management services
+• Monitoring and platform tools
 
 ---
 
-# What This Deployment Demonstrates
+## Spoke Networks
 
-This repository demonstrates several key Azure platform engineering concepts:
+Spoke networks host application workloads and connect to the hub.
 
-Terraform Infrastructure as Code
-Azure Virtual Networks and Subnets
-Hub and Spoke network architecture
-Network segmentation
-VNet Peering between hub and spoke networks
-Environment isolation for Dev and Production workloads
+### Dev Spoke
 
-These patterns are commonly used in enterprise Azure environments and align with **Microsoft Cloud Adoption Framework landing zone guidance**.
+CIDR
+
+10.1.0.0/16
+
+Subnet
+
+ApplicationSubnet – 10.1.1.0/24
+
+---
+
+### Prod Spoke
+
+CIDR
+
+10.2.0.0/16
+
+Subnet
+
+ApplicationSubnet – 10.2.1.0/24
+
+---
+
+# Network Connectivity
+
+The spoke networks connect to the hub using **VNet peering**.
+
+Traffic flows through the hub network where security controls can be applied.
+
+Typical traffic pattern
+
+Workload → Hub Network → Firewall → Internet
 
 ---
 
 # Repository Structure
 
 ```
-azure-landing-zones/
+azure-landing-zones
 │
 ├── README.md
 │
-├── terraform/
+├── terraform
 │   ├── main.tf
 │   ├── variables.tf
-│   └── outputs.tf
+│   ├── outputs.tf
+│   └── versions.tf
 │
-├── examples/
-│   └── sample.tfvars
-│
-└── diagrams/
-    └── architecture.png
+└── examples
+    └── sample.tfvars
 ```
 
 ---
 
 # Prerequisites
 
-Before deploying this infrastructure you will need:
+To deploy this infrastructure you will need:
 
 • Azure subscription
-• Terraform installed (v1.5+ recommended)
+• Terraform installed (v1.5 or later recommended)
 • Azure CLI installed
-• Contributor permissions in the target subscription
+• Contributor permissions on the Azure subscription
 
 ---
 
-# Deployment Steps
+# Deployment
 
 Clone the repository
 
@@ -156,13 +163,13 @@ Initialize Terraform
 terraform init
 ```
 
-Review deployment plan
+Preview the deployment
 
 ```
 terraform plan
 ```
 
-Deploy infrastructure
+Deploy the infrastructure
 
 ```
 terraform apply
@@ -178,7 +185,7 @@ Example configuration is provided in:
 examples/sample.tfvars
 ```
 
-Example values:
+Example values
 
 ```
 location = "Australia East"
@@ -187,28 +194,28 @@ resource_group_name = "rg-landing-zone-network"
 
 ---
 
-# Future Improvements
+# Learning Goals
 
-This project can be extended with additional landing zone components:
+This repository demonstrates practical experience with:
 
-• Azure Firewall deployment
-• Network Security Groups
-• Route tables and forced tunnelling
-• Azure Policy assignments
-• Log Analytics and monitoring
-• Azure Bastion for secure management access
-• Hybrid connectivity with Azure Arc or VPN
+Azure Virtual Networks
+Hub-and-Spoke architecture
+Infrastructure as Code using Terraform
+Cloud networking design patterns
+Environment isolation for workloads
 
 ---
 
-# Learning Objectives
+# Future Enhancements
 
-This project was created to demonstrate hands-on experience with:
+Possible improvements to this architecture include:
 
-Azure platform engineering
-Infrastructure automation using Terraform
-Secure cloud networking design
-Enterprise landing zone patterns
+• Azure Firewall deployment
+• Network Security Groups
+• User Defined Routes (UDR)
+• Azure Bastion for secure access
+• Log Analytics and monitoring
+• Hybrid connectivity using VPN or Azure Arc
 
 ---
 

@@ -1,3 +1,3 @@
-location      = "Australia East"
-hub_rg_name   = "rg-hub"
-hub_vnet_name = "vnet-hub"
+location = "Australia East"
+
+resource_group_name = "rg-landing-zone-network"
