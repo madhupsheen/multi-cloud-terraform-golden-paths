@@ -50,7 +50,7 @@ graph TD
 
     FW --> HubVNet
     RBAC --> HubVNet
-
+```
 *Diagram shows the hub-and-spoke layout with central firewall, spoke networks, and hybrid server connectivity via Azure Arc.*
 
 ---
