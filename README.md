@@ -33,9 +33,6 @@ graph TD
     IGW <--> Hub_VPC_Shared
     Hub_VPC_Shared <--> Dev_Spoke_VPC
     Hub_VPC_Shared <--> Prod_Spoke_VPC
-    
-    style ProdApp fill:#f96,stroke:#333,stroke-width:2px
-    style Secrets fill:#bbf,stroke:#333,stroke-width:2px
 ```
 
 ### **VPC Design & Segmentation**
