@@ -11,6 +11,33 @@ This project showcases the translation of **Hub-and-Spoke Networking** and **Aut
 
 This architecture focuses on cloud-native SaaS delivery, mirroring the requirements for a secure, isolated production environment.
 
+### **Architecture Diagram**
+```mermaid
+graph TD
+    Internet((Internet))
+    subgraph Hub_VPC_Shared
+    IGW[Internet Gateway]
+    IAM[IAM Governance]
+    Secrets[AWS Secrets Manager]
+    end
+
+    subgraph Dev_Spoke_VPC
+    DevApp[Dev Application Tier]
+    end
+
+    subgraph Prod_Spoke_VPC
+    ProdApp[Prod Application Tier]
+    end
+
+    Internet <--> IGW
+    IGW <--> Hub_VPC_Shared
+    Hub_VPC_Shared <--> Dev_Spoke_VPC
+    Hub_VPC_Shared <--> Prod_Spoke_VPC
+    
+    style ProdApp fill:#f96,stroke:#333,stroke-width:2px
+    style Secrets fill:#bbf,stroke:#333,stroke-width:2px
+```
+
 ### **VPC Design & Segmentation**
 
 | VPC Type | CIDR Block | Primary Purpose |
