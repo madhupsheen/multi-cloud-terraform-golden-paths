@@ -1,36 +1,51 @@
-# HUB VPC (Shared Services & Security)
+# ---------------------------------------------------------
+# HUB VPC - Shared Services & Centralized Governance
+# ---------------------------------------------------------
 resource "aws_vpc" "hub" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
-  tags                 = { Name = "arlo-vpc-hub" }
+  tags = {
+    Name = "${var.environment_name}-hub"
+    Tier = "Shared-Services"
+  }
 }
 
 resource "aws_subnet" "shared_services" {
   vpc_id            = aws_vpc.hub.id
   cidr_block        = "10.0.1.0/24"
   availability_zone = "${var.region}a"
-  tags              = { Name = "arlo-subnet-shared" }
+  tags = {
+    Name = "${var.environment_name}-shared-subnet"
+  }
 }
 
-# DEV & PROD SPOKE VPCS
+# ---------------------------------------------------------
+# SPOKE VPCS - Environment Isolation (Dev & Prod)
+# ---------------------------------------------------------
 resource "aws_vpc" "dev" {
   cidr_block = "10.1.0.0/16"
-  tags       = { Name = "arlo-vpc-dev" }
+  tags       = { Name = "${var.environment_name}-dev-spoke" }
 }
 
 resource "aws_vpc" "prod" {
   cidr_block = "10.2.0.0/16"
-  tags       = { Name = "arlo-vpc-prod" }
+  tags       = { Name = "${var.environment_name}-prod-spoke" }
 }
 
-# SECURITY-BY-DESIGN (Arlo JD Highlight)
-resource "aws_secretsmanager_secret" "db_creds" {
-  name        = "prod/platform/db-credentials"
-  description = "Managed via Terraform - Path to Production"
+# ---------------------------------------------------------
+# SECURITY & SECRETS - "Security-by-Design" Implementation
+# ---------------------------------------------------------
+
+# Generic Secrets Management for SaaS Workloads
+resource "aws_secretsmanager_secret" "app_secrets" {
+  name        = "${var.environment_name}/app/production-credentials"
+  description = "Maintained via Terraform - Secure Path-to-Production"
 }
 
-resource "aws_iam_role" "platform_engineer" {
-  name = "ArloPlatformEngineeringRole"
+# IAM Role for Platform Engineering Automation
+resource "aws_iam_role" "platform_admin" {
+  name = "${var.environment_name}-admin-role"
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
