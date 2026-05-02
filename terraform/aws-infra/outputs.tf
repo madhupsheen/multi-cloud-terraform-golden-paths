@@ -1,32 +1,18 @@
-# VPC IDs - Essential for peering and networking checks
-output "hub_vpc_id" {
-  description = "The ID of the Hub VPC"
-  value       = aws_vpc.hub.id
+output "vpc_ids" {
+  description = "IDs of the generated VPCs"
+  value = {
+    hub  = aws_vpc.hub.id
+    dev  = aws_vpc.dev.id
+    prod = aws_vpc.prod.id
+  }
 }
 
-output "dev_vpc_id" {
-  description = "The ID of the Dev Spoke VPC"
-  value       = aws_vpc.dev.id
-}
-
-output "prod_vpc_id" {
-  description = "The ID of the Prod Spoke VPC"
-  value       = aws_vpc.prod.id
-}
-
-# Security & Secrets - Shows you care about the "Path to Production"
 output "secrets_manager_arn" {
-  description = "The ARN of the Secrets Manager secret for the platform"
-  value       = aws_secretsmanager_secret.db_creds.arn
+  description = "The ARN of the Secrets Manager entry for platform credentials"
+  value       = aws_secretsmanager_secret.app_secrets.arn
 }
 
-output "platform_role_arn" {
-  description = "The IAM Role ARN for the Platform Engineering team"
-  value       = aws_iam_role.platform_engineer.arn
-}
-
-# Region Info
-output "aws_region" {
-  description = "The deployment region"
-  value       = var.region
+output "platform_role_name" {
+  description = "The name of the IAM role created for platform management"
+  value       = aws_iam_role.platform_admin.name
 }
