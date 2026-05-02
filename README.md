@@ -1,224 +1,99 @@
-# Azure Landing Zone – Hub and Spoke Architecture (Terraform)
+# Multi-Cloud Platform Foundations (Terraform)
 
-This repository demonstrates a simplified **Azure Landing Zone hub-and-spoke network architecture** built using **Terraform Infrastructure as Code (IaC)**.
+This repository demonstrates a **Security-by-Design** approach to cloud infrastructure. The goal is to establish a **"Golden Path" to production**—providing secure, scalable, and self-service infrastructure patterns that empower development teams to ship code faster.
 
-The goal of this project is to show how Azure environments can be structured using **enterprise networking patterns**, including centralized security, isolated workloads, and scalable cloud architecture.
-
-This project focuses on:
-
-• Hub and Spoke network design
-• Infrastructure automation using Terraform
-• Network segmentation for Dev and Production environments
-• Reusable Azure infrastructure patterns
-
-The architecture reflects common practices used in enterprise cloud environments.
+This project showcases the translation of **Hub-and-Spoke Networking** and **Automated Governance** across both AWS and Azure using modular Terraform.
 
 ---
 
-# Architecture Diagram
+# 1. AWS Platform Architecture
+*Located in `/aws-infra`*
 
+This architecture focuses on cloud-native SaaS delivery, mirroring the requirements for a secure, isolated production environment.
+
+### **VPC Design & Segmentation**
+
+| VPC Type | CIDR Block | Primary Purpose |
+| :--- | :--- | :--- |
+| **Hub VPC** | `10.0.0.0/16` | Shared services, security inspection, and IAM governance. |
+| **Dev Spoke** | `10.1.0.0/16` | Isolated development environment for stream-aligned teams. |
+| **Prod Spoke**| `10.2.0.0/16` | Hardened production environment for application workloads. |
+
+### **Key Technical Features**
+*   **Identity Governance:** Automated **IAM Role** provisioning with least-privilege trust policies.
+*   **Secrets Management:** Integration with **AWS Secrets Manager** to ensure zero-trust credential handling.
+*   **Availability:** Designed for Multi-AZ subnet distribution to ensure platform reliability.
+*   **Security-by-Design:** Strict Security Group rules and resource-level tagging for lifecycle management.
+
+---
+
+# 2. Azure Landing Zone Architecture
+*Located in `/azure-infra`*
+
+This section follows the **Cloud Adoption Framework (CAF)** patterns for enterprise-scale networking and centralized security.
+
+### **Architecture Diagram**
 ```mermaid
 graph TD
-
     Internet((Internet))
-
     subgraph Hub_VNet
-        Firewall[Azure Firewall Subnet]
-        Mgmt[Management Subnet]
-        Shared[Shared Services Subnet]
+    Firewall[Azure Firewall Subnet]
+    Mgmt[Management Subnet]
+    Shared[Shared Services Subnet]
     end
-
     subgraph Dev_Spoke
-        DevApp[Dev Application Subnet]
+    DevApp[Dev Application Subnet]
     end
-
     subgraph Prod_Spoke
-        ProdApp[Prod Application Subnet]
+    ProdApp[Prod Application Subnet]
     end
-
     Internet --> Firewall
     Firewall --> Mgmt
     Firewall --> Shared
-
-    Hub_VNet --> DevApp
-    Hub_VNet --> ProdApp
+    Hub_VNet <--> DevApp
+    Hub_VNet <--> ProdApp
 ```
+
+### **Architecture Breakdown**
+*   **Hub VNet (10.0.0.0/16):** Hosts the `AzureFirewallSubnet`, `ManagementSubnet`, and `SharedServicesSubnet`.
+*   **Spoke VNets:** Workload isolation for **Dev (10.1.0.0/16)** and **Prod (10.2.0.0/16)**.
+*   **Connectivity:** High-performance **VNet Peering** allows spokes to route traffic through the Hub for centralized security.
 
 ---
 
-# Architecture Overview
+# Deployment & Usage
 
-This architecture follows a **hub-and-spoke model**.
+### **Prerequisites**
+*   **Terraform** (v1.5.0 or later)
+*   **AWS CLI** & **Azure CLI** configured with appropriate permissions.
 
-## Hub Virtual Network
-
-The hub network contains shared infrastructure and central security services.
-
-Hub VNet CIDR
-
-10.0.0.0/16
-
-Subnets
-
-AzureFirewallSubnet – 10.0.0.0/24
-ManagementSubnet – 10.0.1.0/24
-SharedServicesSubnet – 10.0.2.0/24
-
-The hub is designed to host:
-
-• Centralized firewall and security inspection
-• Shared management services
-• Monitoring and platform tools
-
----
-
-## Spoke Networks
-
-Spoke networks host application workloads and connect to the hub.
-
-### Dev Spoke
-
-CIDR
-
-10.1.0.0/16
-
-Subnet
-
-ApplicationSubnet – 10.1.1.0/24
+### **Quick Start**
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com
+    cd multi-cloud-platform-foundations
+    ```
+2.  **Deploy AWS Infrastructure:**
+    ```bash
+    cd aws-infra
+    terraform init
+    terraform plan -var-file="terraform.tfvars"
+    terraform apply
+    ```
+3.  **Deploy Azure Infrastructure:**
+    ```bash
+    cd ../azure-infra
+    terraform init
+    terraform apply -var-file="sample.tfvars"
+    ```
 
 ---
 
-### Prod Spoke
-
-CIDR
-
-10.2.0.0/16
-
-Subnet
-
-ApplicationSubnet – 10.2.1.0/24
-
----
-
-# Network Connectivity
-
-The spoke networks connect to the hub using **VNet peering**.
-
-Traffic flows through the hub network where security controls can be applied.
-
-Typical traffic pattern
-
-Workload → Hub Network → Firewall → Internet
-
----
-
-# Repository Structure
-
-```
-azure-landing-zones
-│
-├── README.md
-│
-├── terraform
-│   ├── main.tf
-│   ├── variables.tf
-│   ├── outputs.tf
-│   └── versions.tf
-│
-└── examples
-    └── sample.tfvars
-```
-
----
-
-# Prerequisites
-
-To deploy this infrastructure you will need:
-
-• Azure subscription
-• Terraform installed (v1.5 or later recommended)
-• Azure CLI installed
-• Contributor permissions on the Azure subscription
-
----
-
-# Deployment
-
-Clone the repository
-
-```
-git clone https://github.com/madhupsheen/azure-landing-zones.git
-cd azure-landing-zones/terraform
-```
-
-Login to Azure
-
-```
-az login
-```
-
-Initialize Terraform
-
-```
-terraform init
-```
-
-Preview the deployment
-
-```
-terraform plan
-```
-
-Deploy the infrastructure
-
-```
-terraform apply
-```
-
----
-
-# Example Variables
-
-Example configuration is provided in:
-
-```
-examples/sample.tfvars
-```
-
-Example values
-
-```
-location = "Australia East"
-resource_group_name = "rg-landing-zone-network"
-```
-
----
-
-# Learning Goals
-
-This repository demonstrates practical experience with:
-
-Azure Virtual Networks
-Hub-and-Spoke architecture
-Infrastructure as Code using Terraform
-Cloud networking design patterns
-Environment isolation for workloads
-
----
-
-# Future Enhancements
-
-Possible improvements to this architecture include:
-
-• Azure Firewall deployment
-• Network Security Groups
-• User Defined Routes (UDR)
-• Azure Bastion for secure access
-• Log Analytics and monitoring
-• Hybrid connectivity using VPN or Azure Arc
-
----
+# Platform Engineering Principles
+1.  **Infrastructure as Code (IaC):** 100% automated for repeatable, documented deployments.
+2.  **Developer Experience (DevEx):** Modular code structure that reduces manual friction for developers.
+3.  **Governance:** Centralized secrets management and strict identity access controls.
+4.  **Observability-Ready:** Designed to integrate with Prometheus, Grafana, or native cloud logging.
 
 # License
-
 MIT License
