@@ -77,14 +77,14 @@ graph TD
     ```bash
     cd aws-infra
     terraform init
-    terraform plan -var-file="terraform.tfvars"
+    terraform plan -var-file="aws-sample.tfvars"
     terraform apply
     ```
 3.  **Deploy Azure Infrastructure:**
     ```bash
     cd ../azure-infra
     terraform init
-    terraform apply -var-file="sample.tfvars"
+    terraform apply -var-file="azure-sample.tfvars"
     ```
 
 ---
